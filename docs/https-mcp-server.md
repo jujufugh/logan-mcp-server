@@ -41,17 +41,13 @@ the supplied service template uses `opc`.
    ALL {instance.id = '<instance_ocid>'}
    ```
 
-2. Grant only the read permissions required for query, source, and field
-   discovery. The following granular example avoids access to unrelated Log
-   Analytics feature types:
+2. Grant only the permissions required for query, source, and field discovery.
+   The following granular example uses the exact permissions listed for the OCI
+   API operations:
 
    ```text
-   Allow dynamic-group <dynamic_group_name> to read loganalytics-lifecycle in tenancy
-   Allow dynamic-group <dynamic_group_name> to read loganalytics-query in tenancy
-   Allow dynamic-group <dynamic_group_name> to inspect loganalytics-source in tenancy
-   Allow dynamic-group <dynamic_group_name> to inspect loganalytics-field in tenancy
-   Allow dynamic-group <dynamic_group_name> to read loganalytics-log-group in compartment id <compartment_ocid>
-   Allow dynamic-group <dynamic_group_name> to read loganalytics-queryjob-work-request in compartment id <compartment_ocid>
+   Allow dynamic-group <dynamic_group_name> to {LOG_ANALYTICS_LIFECYCLE_READ, LOG_ANALYTICS_QUERY_VIEW, LOG_ANALYTICS_SOURCE_INSPECT, LOG_ANALYTICS_FIELD_INSPECT} in tenancy
+   Allow dynamic-group <dynamic_group_name> to {LOGANALYTICS_LOG_GROUP_READ_LOGS, LOG_ANALYTICS_QUERYJOB_WORK_REQUEST_READ} in compartment id <compartment_ocid>
    Allow dynamic-group <dynamic_group_name> to read compartments in tenancy
    ```
 
@@ -59,9 +55,11 @@ the supplied service template uses `opc`.
    statements to `in tenancy`. The [Log Analytics policy
    reference](https://docs.oracle.com/en-us/iaas/Content/Identity/policyreference/loganalyticspolicyreference.htm)
    is authoritative for the permissions required by `Query`, `ListSources`,
-   and `ListFields`. A broader family-level read policy is easier to maintain,
-   but it grants the instance principal read access to additional Log Analytics
-   resource types that this endpoint does not expose.
+   and `ListFields`. Using the exact permission set also avoids unrelated
+   permissions bundled into broader verbs. For example, Oracle currently maps
+   `read loganalytics-queryjob-work-request` to both read and delete/cancel
+   permissions. Validate the policy in your tenancy and expand it only when an
+   observed API denial identifies a documented requirement.
 
 3. Confirm that Log Analytics is already onboarded in the tenancy and that the
    target compartment contains the log groups the endpoint should query.
@@ -195,7 +193,7 @@ the target client's discovery and bounded tool-call checks all pass.
 ## 7. Add the endpoint to Fusion AI Agent Studio
 
 Oracle's current workflow is documented in [Add MCP
-Tool](https://docs.oracle.com/en/cloud/saas/fusion-ai/26b/aiaas/add-mcp-tool.html).
+Tool](https://docs.oracle.com/en/cloud/saas/fusion-ai/26c/aiaas/add-mcp-tool.html).
 Labels can vary by Fusion release.
 
 1. Open **AI Agent Studio**, then **Tools**, and create a tool of type **MCP**.
